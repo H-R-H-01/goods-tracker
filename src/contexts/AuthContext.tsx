@@ -2,7 +2,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { User, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { User, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 
 const AuthContext = createContext<{
@@ -20,6 +20,7 @@ const AuthContext = createContext<{
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isSigningIn, setIsSigningIn] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -31,10 +32,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const signIn = async () => {
+        if (isSigningIn) return;
+        setIsSigningIn(true);
         try {
             await signInWithPopup(auth, new GoogleAuthProvider());
-        } catch (error) {
-            console.error("Error signing in with Google", error);
+        } catch (error: any) {
+            if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/popup-blocked') {
+                console.log("Sign-in popup closed or blocked by user.");
+            } else {
+                console.error("Error signing in with Google", error);
+            }
+        } finally {
+            setIsSigningIn(false);
         }
     };
 
