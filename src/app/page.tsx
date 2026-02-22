@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 
 export default function Home() {
@@ -12,6 +12,52 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [type, setType] = useState<"in" | "out">("in");
+
+  const [suggestions, setSuggestions] = useState({
+    locations: new Set<string>(),
+    goodsNames: new Set<string>(),
+    fromLocations: new Set<string>(),
+    toLocations: new Set<string>(),
+    vehicleNumbers: new Set<string>(),
+    driverNames: new Set<string>(),
+    driverContacts: new Set<string>(),
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSuggestions = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "records"));
+        const newSuggestions = {
+          locations: new Set<string>(),
+          goodsNames: new Set<string>(),
+          fromLocations: new Set<string>(),
+          toLocations: new Set<string>(),
+          vehicleNumbers: new Set<string>(),
+          driverNames: new Set<string>(),
+          driverContacts: new Set<string>(),
+        };
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.location) newSuggestions.locations.add(data.location);
+          if (data.goodsName) newSuggestions.goodsNames.add(data.goodsName);
+          if (data.fromLocation) newSuggestions.fromLocations.add(data.fromLocation);
+          if (data.toLocation) newSuggestions.toLocations.add(data.toLocation);
+          if (data.vehicleNumber) newSuggestions.vehicleNumbers.add(data.vehicleNumber);
+          if (data.driverName) newSuggestions.driverNames.add(data.driverName);
+          if (data.driverContact) newSuggestions.driverContacts.add(data.driverContact);
+        });
+
+        setSuggestions(newSuggestions);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    };
+
+    fetchSuggestions();
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,6 +89,27 @@ export default function Home() {
 
     try {
       await addDoc(collection(db, "records"), record);
+
+      setSuggestions(prev => {
+        const next = {
+          locations: new Set(prev.locations),
+          goodsNames: new Set(prev.goodsNames),
+          fromLocations: new Set(prev.fromLocations),
+          toLocations: new Set(prev.toLocations),
+          vehicleNumbers: new Set(prev.vehicleNumbers),
+          driverNames: new Set(prev.driverNames),
+          driverContacts: new Set(prev.driverContacts),
+        };
+        if (record.location) next.locations.add(record.location as string);
+        if (record.goodsName) next.goodsNames.add(record.goodsName as string);
+        if (record.fromLocation) next.fromLocations.add(record.fromLocation as string);
+        if (record.toLocation) next.toLocations.add(record.toLocation as string);
+        if (record.vehicleNumber) next.vehicleNumbers.add(record.vehicleNumber as string);
+        if (record.driverName) next.driverNames.add(record.driverName as string);
+        if (record.driverContact) next.driverContacts.add(record.driverContact as string);
+        return next;
+      });
+
       setStatus("success");
       (e.target as HTMLFormElement).reset();
       setType("in"); // Reset type default
@@ -88,6 +155,14 @@ export default function Home() {
         </p>
       </div>
 
+      <datalist id="locations-list">{Array.from(suggestions.locations).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="goodsNames-list">{Array.from(suggestions.goodsNames).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="fromLocations-list">{Array.from(suggestions.fromLocations).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="toLocations-list">{Array.from(suggestions.toLocations).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="vehicleNumbers-list">{Array.from(suggestions.vehicleNumbers).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="driverNames-list">{Array.from(suggestions.driverNames).map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="driverContacts-list">{Array.from(suggestions.driverContacts).map((v) => <option key={v} value={v} />)}</datalist>
+
       <form onSubmit={handleSubmit} className="bg-white p-8 border border-gray-200 rounded-xl shadow-sm space-y-8">
 
         {/* Status Messages */}
@@ -131,6 +206,7 @@ export default function Home() {
               name="location"
               id="location"
               required
+              list="locations-list"
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
               placeholder="e.g. Warehouse A"
             />
@@ -145,6 +221,7 @@ export default function Home() {
               name="goodsName"
               id="goodsName"
               required
+              list="goodsNames-list"
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
               placeholder="e.g. Steel Rods"
             />
@@ -197,7 +274,7 @@ export default function Home() {
             <>
               <div>
                 <label htmlFor="fromLocation" className="block text-sm font-medium text-gray-700 mb-1">From (Source) *</label>
-                <input type="text" name="fromLocation" required className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Supplier X" />
+                <input type="text" name="fromLocation" required list="fromLocations-list" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Supplier X" />
               </div>
               <div>
                 <label htmlFor="timeArrived" className="block text-sm font-medium text-gray-700 mb-1">Time Arrived *</label>
@@ -208,7 +285,7 @@ export default function Home() {
             <>
               <div>
                 <label htmlFor="toLocation" className="block text-sm font-medium text-gray-700 mb-1">To (Destination) *</label>
-                <input type="text" name="toLocation" required className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Customer Y" />
+                <input type="text" name="toLocation" required list="toLocations-list" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Customer Y" />
               </div>
               <div>
                 <label htmlFor="timeLeft" className="block text-sm font-medium text-gray-700 mb-1">Time Left *</label>
@@ -230,6 +307,7 @@ export default function Home() {
               name="vehicleNumber"
               id="vehicleNumber"
               required
+              list="vehicleNumbers-list"
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
               placeholder="e.g. TN-00-AA-0000"
             />
@@ -244,6 +322,7 @@ export default function Home() {
               name="driverName"
               id="driverName"
               required
+              list="driverNames-list"
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
               placeholder="e.g. John Doe"
             />
@@ -258,6 +337,7 @@ export default function Home() {
               name="driverContact"
               id="driverContact"
               required
+              list="driverContacts-list"
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
               placeholder="e.g. +91 9876543210"
             />
