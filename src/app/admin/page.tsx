@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { GoodsRecord } from "@/lib/types";
-import { Loader2, Search, Edit2, Trash2, X, Save } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminDashboard() {
@@ -18,6 +18,7 @@ export default function AdminDashboard() {
 
     // Edit State
     const [editingRecord, setEditingRecord] = useState<GoodsRecord | null>(null);
+    const [printingRecord, setPrintingRecord] = useState<GoodsRecord | null>(null);
 
     useEffect(() => {
         if (!user) return;
@@ -83,6 +84,58 @@ export default function AdminDashboard() {
         }
     };
 
+    const exportToCSV = () => {
+        if (filteredRecords.length === 0) {
+            alert("No records to export.");
+            return;
+        }
+
+        const headers = [
+            "Date", "Type", "Location", "Goods Name", "Quantity",
+            "From (Source)", "To (Destination)", "Time Arrived", "Time Left",
+            "Vehicle Number", "Driver Name", "Driver Contact", "Created By", "Comments"
+        ];
+
+        const csvData = filteredRecords.map(record => [
+            format(new Date(record.createdAt), "yyyy-MM-dd HH:mm:ss"),
+            record.type.toUpperCase(),
+            `"${record.location || ''}"`,
+            `"${record.goodsName || ''}"`,
+            record.quantity,
+            `"${record.fromLocation || ''}"`,
+            `"${record.toLocation || ''}"`,
+            record.timeArrived ? format(new Date(record.timeArrived), "yyyy-MM-dd HH:mm:ss") : '',
+            record.timeLeft ? format(new Date(record.timeLeft), "yyyy-MM-dd HH:mm:ss") : '',
+            `"${record.vehicleNumber || ''}"`,
+            `"${record.driverName || ''}"`,
+            `"${record.driverContact || ''}"`,
+            `"${record.userName || ''}"`,
+            `"${record.comments || ''}"`
+        ]);
+
+        const csvContent = [
+            headers.join(','),
+            ...csvData.map(row => row.join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `goods_tracker_export_${format(new Date(), "yyyy-MM-dd_HHmmss")}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayRecords = records.filter(r => new Date(r.createdAt) >= today);
+    const todayIn = todayRecords.filter(r => r.type === "in").length;
+    const todayOut = todayRecords.filter(r => r.type === "out").length;
+    const uniqueLocations = new Set(todayRecords.map(r => r.location)).size;
+
     if (loading || loadingRecords) {
         return (
             <div className="flex justify-center items-center h-[50vh]">
@@ -108,8 +161,15 @@ export default function AdminDashboard() {
                     <p className="text-gray-500 mt-1">Manage and view all goods movement records.</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative">
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                    <button
+                        onClick={exportToCSV}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                    >
+                        <Download className="h-4 w-4 mr-2" />
+                        Export CSV
+                    </button>
+                    <div className="relative w-full sm:w-auto">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input
                             type="text"
@@ -122,12 +182,52 @@ export default function AdminDashboard() {
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value as any)}
-                        className="border border-gray-300 rounded-md py-2 px-4 focus:ring-black focus:border-black bg-white"
+                        className="border border-gray-300 rounded-md py-2 px-4 focus:ring-black focus:border-black bg-white w-full sm:w-auto"
                     >
                         <option value="all">All Movements</option>
                         <option value="in">In (Entry)</option>
                         <option value="out">Out (Exit)</option>
                     </select>
+                </div>
+            </div>
+
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex items-center">
+                    <div className="p-3 rounded-full bg-blue-50 text-blue-600 mr-4">
+                        <Package className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Total Today</p>
+                        <p className="text-2xl font-bold text-gray-900">{todayRecords.length}</p>
+                    </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex items-center">
+                    <div className="p-3 rounded-full bg-green-50 text-green-600 mr-4">
+                        <ArrowDownRight className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Entries Today</p>
+                        <p className="text-2xl font-bold text-gray-900">{todayIn}</p>
+                    </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex items-center">
+                    <div className="p-3 rounded-full bg-purple-50 text-purple-600 mr-4">
+                        <ArrowUpRight className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Exits Today</p>
+                        <p className="text-2xl font-bold text-gray-900">{todayOut}</p>
+                    </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex items-center">
+                    <div className="p-3 rounded-full bg-orange-50 text-orange-600 mr-4">
+                        <MapPin className="h-6 w-6" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Active Locations Today</p>
+                        <p className="text-2xl font-bold text-gray-900">{uniqueLocations}</p>
+                    </div>
                 </div>
             </div>
 
@@ -191,14 +291,26 @@ export default function AdminDashboard() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{record.userName}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button
+                                            onClick={() => setPrintingRecord(record)}
+                                            className="text-gray-500 hover:text-black mr-4 transition-colors"
+                                            title="Print Receipt"
+                                        >
+                                            <Printer className="h-4 w-4" />
+                                        </button>
+                                        <button
                                             onClick={() => setEditingRecord(record)}
                                             className="text-black hover:text-gray-700 mr-4"
                                             title="Edit"
                                         >
                                             <Edit2 className="h-4 w-4" />
                                         </button>
-                                        {/* Add Delete if needed, though user didn't explicitly ask for it, Admin usually has it */}
-                                        {/* <button onClick={() => handleDelete(record.id)} className="text-red-600 hover:text-red-900"><Trash2 className="h-4 w-4" /></button> */}
+                                        <button
+                                            onClick={() => handleDelete(record.id)}
+                                            className="text-red-600 hover:text-red-900 transition-colors"
+                                            title="Delete"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
                                     </td>
                                 </tr>
                             ))
@@ -310,6 +422,93 @@ export default function AdminDashboard() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Print Modal */}
+            {printingRecord && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:bg-white print:p-0 print:backdrop-blur-none" onClick={() => setPrintingRecord(null)}>
+                    <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-8 print:shadow-none print:max-w-none print:w-full print:p-8 relative" onClick={(e) => e.stopPropagation()}>
+                        <div className="absolute top-4 right-4 print:hidden flex gap-2">
+                            <button
+                                onClick={() => window.print()}
+                                className="p-2 text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                                title="Print"
+                            >
+                                <Printer className="h-4 w-4" />
+                            </button>
+                            <button
+                                onClick={() => setPrintingRecord(null)}
+                                className="p-2 text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
+                                title="Close"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="text-center mb-6">
+                            <h2 className="text-2xl font-bold uppercase tracking-widest text-black">Goods Tracker</h2>
+                            <p className="text-sm text-gray-500 mt-1">Movement Receipt</p>
+                        </div>
+
+                        <div className="border-t border-b border-gray-200 py-4 mb-4 space-y-3">
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 text-sm">Date & Time:</span>
+                                <span className="font-medium text-sm">{format(new Date(printingRecord.createdAt), "dd MMM yyyy, HH:mm")}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 text-sm">Type:</span>
+                                <span className={`font-bold text-sm uppercase ${printingRecord.type === 'in' ? 'text-green-600' : 'text-blue-600'}`}>{printingRecord.type}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 text-sm">Location:</span>
+                                <span className="font-medium text-sm">{printingRecord.location}</span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 text-sm">Goods Name:</span>
+                                <span className="font-bold text-sm text-right">{printingRecord.goodsName}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-gray-500 text-sm">Quantity:</span>
+                                <span className="font-medium text-sm">{printingRecord.quantity}</span>
+                            </div>
+                            {printingRecord.type === "in" && printingRecord.fromLocation && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-sm mr-4">From:</span>
+                                    <span className="font-medium text-sm text-right break-words">{printingRecord.fromLocation}</span>
+                                </div>
+                            )}
+                            {printingRecord.type === "out" && printingRecord.toLocation && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-sm mr-4">To:</span>
+                                    <span className="font-medium text-sm text-right break-words">{printingRecord.toLocation}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6 border border-gray-100 print:bg-white print:border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">Vehicle Details</p>
+                            <div className="flex justify-between mt-2">
+                                <span className="text-gray-600 text-sm">Number:</span>
+                                <span className="font-medium text-sm">{printingRecord.vehicleNumber}</span>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                                <span className="text-gray-600 text-sm">Driver:</span>
+                                <span className="font-medium text-sm">{printingRecord.driverName}</span>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                                <span className="text-gray-600 text-sm">Contact:</span>
+                                <span className="font-medium text-sm">{printingRecord.driverContact}</span>
+                            </div>
+                        </div>
+
+                        <div className="text-center mt-8 pt-4 border-t border-gray-200">
+                            <p className="text-xs text-gray-400">Generated by {printingRecord.userName}</p>
+                        </div>
                     </div>
                 </div>
             )}

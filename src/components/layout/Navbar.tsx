@@ -30,6 +30,12 @@ export function Navbar() {
                             >
                                 Admin Dashboard
                             </Link>
+                            <Link
+                                href="/locations"
+                                className="border-transparent text-gray-500 hover:border-black hover:text-black inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                            >
+                                Locations
+                            </Link>
                         </div>
                     </div>
                     <div className="flex items-center">
