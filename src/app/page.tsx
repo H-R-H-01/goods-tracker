@@ -157,13 +157,13 @@ export default function Home() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">Welcome to GoodsTracker</h1>
-        <p className="text-gray-500 max-w-lg mb-8 text-lg">
+        <h1 className="text-4xl font-bold tracking-tight mb-4 dark:text-white">Welcome to GoodsTracker</h1>
+        <p className="text-gray-500 dark:text-gray-400 max-w-lg mb-8 text-lg">
           Track vehicle goods simply and efficiently.
         </p>
         <button
           onClick={signIn}
-          className="bg-black text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-800 transition-colors shadow-lg"
+          className="bg-black text-white dark:bg-white dark:text-black px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-lg"
         >
           Sign In to Continue
         </button>
@@ -174,8 +174,8 @@ export default function Home() {
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Add New Record</h1>
-        <p className="text-gray-500 mt-2">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Add New Record</h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-2">
           Enter details of goods moving in or out.
         </p>
       </div>
@@ -188,7 +188,7 @@ export default function Home() {
       <datalist id="driverNames-list">{Array.from(suggestions.driverNames).map((v) => <option key={v} value={v} />)}</datalist>
       <datalist id="driverContacts-list">{Array.from(suggestions.driverContacts).map((v) => <option key={v} value={v} />)}</datalist>
 
-      <form onSubmit={handleSubmit} className="bg-white p-8 border border-gray-200 rounded-xl shadow-sm space-y-8">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#1a1a1a] p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm space-y-8 transition-colors">
 
         {/* Status Messages */}
         {status === "success" && (
@@ -223,7 +223,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="col-span-1 md:col-span-2">
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Location *
             </label>
             <input
@@ -232,13 +232,13 @@ export default function Home() {
               id="location"
               required
               list="locations-list"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. Warehouse A"
             />
           </div>
 
           <div>
-            <label htmlFor="goodsName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="goodsName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Goods Name *
             </label>
             <input
@@ -247,13 +247,13 @@ export default function Home() {
               id="goodsName"
               required
               list="goodsNames-list"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. Steel Rods"
             />
           </div>
 
           <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Quantity *
             </label>
             <input
@@ -262,13 +262,13 @@ export default function Home() {
               id="quantity"
               required
               min="1"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. 50"
             />
           </div>
 
-          <div className="col-span-1 md:col-span-2 pt-4 pb-4 border-t border-b border-gray-100">
-            <label className="block text-sm font-medium text-gray-700 mb-3">Movement Type *</label>
+          <div className="col-span-1 md:col-span-2 pt-4 pb-4 border-t border-b border-gray-100 dark:border-gray-800">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Movement Type *</label>
             <div className="flex gap-6">
               <label className="flex items-center cursor-pointer group">
                 <input
@@ -277,9 +277,9 @@ export default function Home() {
                   value="in"
                   checked={type === "in"}
                   onChange={() => setType("in")}
-                  className="h-4 w-4 text-black border-gray-300 focus:ring-black"
+                  className="h-4 w-4 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-black dark:focus:ring-white bg-white dark:bg-[#222]"
                 />
-                <span className="ml-2 text-sm text-gray-700 group-hover:text-black">In (Entry)</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">In (Entry)</span>
               </label>
               <label className="flex items-center cursor-pointer group">
                 <input
@@ -288,9 +288,9 @@ export default function Home() {
                   value="out"
                   checked={type === "out"}
                   onChange={() => setType("out")}
-                  className="h-4 w-4 text-black border-gray-300 focus:ring-black"
+                  className="h-4 w-4 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-black dark:focus:ring-white bg-white dark:bg-[#222]"
                 />
-                <span className="ml-2 text-sm text-gray-700 group-hover:text-black">Out (Exit)</span>
+                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">Out (Exit)</span>
               </label>
             </div>
           </div>
@@ -298,33 +298,33 @@ export default function Home() {
           {type === "in" ? (
             <>
               <div>
-                <label htmlFor="fromLocation" className="block text-sm font-medium text-gray-700 mb-1">From (Source) *</label>
-                <input type="text" name="fromLocation" required list="fromLocations-list" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Supplier X" />
+                <label htmlFor="fromLocation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From (Source) *</label>
+                <input type="text" name="fromLocation" required list="fromLocations-list" className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" placeholder="e.g. Supplier X" />
               </div>
               <div>
-                <label htmlFor="timeArrived" className="block text-sm font-medium text-gray-700 mb-1">Time Arrived *</label>
-                <input type="datetime-local" name="timeArrived" required className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" />
+                <label htmlFor="timeArrived" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Arrived *</label>
+                <input type="datetime-local" name="timeArrived" required className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" />
               </div>
             </>
           ) : (
             <>
               <div>
-                <label htmlFor="toLocation" className="block text-sm font-medium text-gray-700 mb-1">To (Destination) *</label>
-                <input type="text" name="toLocation" required list="toLocations-list" className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" placeholder="e.g. Customer Y" />
+                <label htmlFor="toLocation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To (Destination) *</label>
+                <input type="text" name="toLocation" required list="toLocations-list" className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" placeholder="e.g. Customer Y" />
               </div>
               <div>
-                <label htmlFor="timeLeft" className="block text-sm font-medium text-gray-700 mb-1">Time Left *</label>
-                <input type="datetime-local" name="timeLeft" required className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border" />
+                <label htmlFor="timeLeft" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Left *</label>
+                <input type="datetime-local" name="timeLeft" required className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" />
               </div>
             </>
           )}
 
           <div className="col-span-1 md:col-span-2 pt-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Vehicle & Driver Details</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Vehicle & Driver Details</h3>
           </div>
 
           <div>
-            <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Vehicle Number *
             </label>
             <input
@@ -333,13 +333,13 @@ export default function Home() {
               id="vehicleNumber"
               required
               list="vehicleNumbers-list"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. TN-00-AA-0000"
             />
           </div>
 
           <div>
-            <label htmlFor="driverName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="driverName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Driver Name *
             </label>
             <input
@@ -348,13 +348,13 @@ export default function Home() {
               id="driverName"
               required
               list="driverNames-list"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. John Doe"
             />
           </div>
 
           <div>
-            <label htmlFor="driverContact" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="driverContact" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Driver Contact *
             </label>
             <input
@@ -363,20 +363,20 @@ export default function Home() {
               id="driverContact"
               required
               list="driverContacts-list"
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="e.g. +91 9876543210"
             />
           </div>
 
           <div className="col-span-1 md:col-span-2">
-            <label htmlFor="comments" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="comments" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Comments (Optional)
             </label>
             <textarea
               name="comments"
               id="comments"
               rows={3}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm px-4 py-2 border"
+              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
               placeholder="Any additional notes..."
             />
           </div>
@@ -386,7 +386,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center py-2 px-8 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="inline-flex items-center justify-center py-2 px-8 border border-transparent shadow-sm text-sm font-medium rounded-md text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white dark:focus:ring-offset-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             {isSubmitting ? (
               <>
@@ -402,13 +402,13 @@ export default function Home() {
 
       {/* Recent Entries Error UI */}
       {recentRecordsError && (
-        <div className="mt-12 bg-white p-6 md:p-8 border border-gray-200 rounded-xl shadow-sm">
+        <div className="mt-12 bg-white dark:bg-[#1a1a1a] p-6 md:p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm transition-colors">
           <div className="flex items-center gap-2 mb-2">
-            <Clock className="h-5 w-5 text-gray-500" />
-            <h2 className="text-xl font-bold text-gray-900">Your Recent Entries</h2>
+            <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Recent Entries</h2>
           </div>
-          <div className="bg-orange-50 p-4 border border-orange-200 rounded-md">
-            <p className="text-sm text-orange-800">
+          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-200 dark:border-orange-800/50 rounded-md">
+            <p className="text-sm text-orange-800 dark:text-orange-200">
               <strong>Database Index Required:</strong> Your recent entries cannot be displayed yet because Firestore needs a composite index for this query.
               <br /><br />
               Please open your browser's <strong>Developer Tools Console</strong> to find the exact direct link generated by Firebase. Clicking that link will automatically build the required index for you in your Firebase Console.
@@ -419,29 +419,29 @@ export default function Home() {
 
       {/* Recent Entries Section */}
       {!recentRecordsError && recentRecords.length > 0 && (
-        <div className="mt-12 bg-white p-6 md:p-8 border border-gray-200 rounded-xl shadow-sm">
+        <div className="mt-12 bg-white dark:bg-[#1a1a1a] p-6 md:p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm transition-colors">
           <div className="flex items-center gap-2 mb-6">
-            <Clock className="h-5 w-5 text-gray-500" />
-            <h2 className="text-xl font-bold text-gray-900">Your Recent Entries</h2>
+            <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Recent Entries</h2>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {recentRecords.map((record) => (
               <div key={record.id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase ${record.type === "in" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase ${record.type === "in" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"}`}>
                       {record.type}
                     </span>
-                    <span className="font-semibold text-gray-900">{record.goodsName}</span>
-                    <span className="text-sm text-gray-500">x{record.quantity}</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">{record.goodsName}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">x{record.quantity}</span>
                   </div>
-                  <div className="text-sm text-gray-500 flex items-center gap-2">
-                    <span className="font-medium text-gray-700">{record.location}</span>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{record.location}</span>
                     <span>•</span>
                     <span>{record.vehicleNumber}</span>
                   </div>
                 </div>
-                <div className="text-sm text-gray-400 whitespace-nowrap">
+                <div className="text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap">
                   {record.createdAt ? format(new Date(record.createdAt), "MMM d, HH:mm") : ''}
                 </div>
               </div>

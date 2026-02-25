@@ -4,50 +4,52 @@
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { LogOut, Truck, User } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function Navbar() {
     const { user, logOut, signIn } = useAuth();
 
     return (
-        <nav className="border-b border-gray-200 bg-white">
+        <nav className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1a1a1a] transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex">
-                        <Link href="/" className="flex-shrink-0 flex items-center gap-2">
+                        <Link href="/" className="flex-shrink-0 flex items-center gap-2 dark:text-white">
                             <Truck className="h-6 w-6" />
                             <span className="font-bold text-xl tracking-tight">GoodsTracker</span>
                         </Link>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                             <Link
                                 href="/"
-                                className="border-transparent text-gray-500 hover:border-black hover:text-black inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-gray-500 dark:text-gray-400 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
                             >
                                 Add Record
                             </Link>
                             <Link
                                 href="/admin"
-                                className="border-transparent text-gray-500 hover:border-black hover:text-black inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-gray-500 dark:text-gray-400 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
                             >
                                 Admin Dashboard
                             </Link>
                             <Link
                                 href="/locations"
-                                className="border-transparent text-gray-500 hover:border-black hover:text-black inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                                className="border-transparent text-gray-500 dark:text-gray-400 hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors"
                             >
                                 Locations
                             </Link>
                         </div>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2 text-sm text-gray-700">
+                                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                                     <User className="h-4 w-4" />
                                     <span>{user.displayName || user.email}</span>
                                 </div>
                                 <button
                                     onClick={logOut}
-                                    className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                                    className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
                                 >
                                     <LogOut className="h-4 w-4 inline mr-2" />
                                     Logout
@@ -56,7 +58,7 @@ export function Navbar() {
                         ) : (
                             <button
                                 onClick={signIn}
-                                className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
+                                className="bg-black dark:bg-white text-white dark:text-black px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors"
                             >
                                 Sign In
                             </button>
