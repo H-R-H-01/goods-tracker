@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { addDoc, collection, getDocs, query, orderBy, limit, where, onSnapshot } from "firebase/firestore";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, Truck, MapPin, ArrowDownRight, ArrowUpRight, Package } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Home() {
@@ -172,11 +172,11 @@ export default function Home() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Add New Record</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2">
-          Enter details of goods moving in or out.
+    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="mb-10 text-center sm:text-left">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Add New Record</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-3 text-lg">
+          Track entry and exit of goods with precision.
         </p>
       </div>
 
@@ -188,58 +188,64 @@ export default function Home() {
       <datalist id="driverNames-list">{Array.from(suggestions.driverNames).map((v) => <option key={v} value={v} />)}</datalist>
       <datalist id="driverContacts-list">{Array.from(suggestions.driverContacts).map((v) => <option key={v} value={v} />)}</datalist>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-[#1a1a1a] p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm space-y-8 transition-colors">
+      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900/50 backdrop-blur-sm p-6 md:p-10 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none space-y-10 transition-all duration-300">
 
         {/* Status Messages */}
         {status === "success" && (
-          <div className="rounded-md bg-green-50 p-4 mb-6 border border-green-200">
-            <div className="flex">
+          <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 p-5 border border-emerald-200 dark:border-emerald-500/20 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+                <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-full">
+                  <svg className="h-5 w-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">Record added successfully!</p>
+              <div className="ml-4">
+                <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">Record saved successfully!</p>
               </div>
             </div>
           </div>
         )}
 
         {status === "error" && (
-          <div className="rounded-md bg-red-50 p-4 mb-6 border border-red-200">
-            <div className="flex">
+          <div className="rounded-2xl bg-rose-50 dark:bg-rose-500/10 p-5 border border-rose-200 dark:border-rose-500/20 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex items-center">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
+                <div className="p-2 bg-rose-100 dark:bg-rose-500/20 rounded-full">
+                  <svg className="h-5 w-5 text-rose-600 dark:text-rose-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
               </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-red-800">Error saving record. Please try again.</p>
+              <div className="ml-4">
+                <p className="text-sm font-semibold text-rose-900 dark:text-rose-400">Failed to save record. Please try again.</p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Location *
+            <label htmlFor="location" className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              Current Location *
             </label>
-            <input
-              type="text"
-              name="location"
-              id="location"
-              required
-              list="locations-list"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. Warehouse A"
-            />
+            <div className="relative group">
+              <input
+                type="text"
+                name="location"
+                id="location"
+                required
+                list="locations-list"
+                className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+                placeholder="Where are the goods now? (e.g. Warehouse A)"
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="goodsName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Goods Name *
+          <div className="space-y-2">
+            <label htmlFor="goodsName" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Goods Description *
             </label>
             <input
               type="text"
@@ -247,13 +253,13 @@ export default function Home() {
               id="goodsName"
               required
               list="goodsNames-list"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. Steel Rods"
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="What's being moved?"
             />
           </div>
 
-          <div>
-            <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div className="space-y-2">
+            <label htmlFor="quantity" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
               Quantity *
             </label>
             <input
@@ -262,70 +268,72 @@ export default function Home() {
               id="quantity"
               required
               min="1"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. 50"
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="e.g. 500"
             />
           </div>
 
-          <div className="col-span-1 md:col-span-2 pt-4 pb-4 border-t border-b border-gray-100 dark:border-gray-800">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Movement Type *</label>
-            <div className="flex gap-6">
-              <label className="flex items-center cursor-pointer group">
-                <input
-                  type="radio"
-                  name="type"
-                  value="in"
-                  checked={type === "in"}
-                  onChange={() => setType("in")}
-                  className="h-4 w-4 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-black dark:focus:ring-white bg-white dark:bg-[#222]"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">In (Entry)</span>
-              </label>
-              <label className="flex items-center cursor-pointer group">
-                <input
-                  type="radio"
-                  name="type"
-                  value="out"
-                  checked={type === "out"}
-                  onChange={() => setType("out")}
-                  className="h-4 w-4 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:ring-black dark:focus:ring-white bg-white dark:bg-[#222]"
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">Out (Exit)</span>
-              </label>
+          <div className="col-span-1 md:col-span-2 pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-200 dark:border-slate-700/50 gap-4">
+              <div className="space-y-1">
+                <h3 className="font-bold text-slate-900 dark:text-white">Movement Direction</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Is this an incoming or outgoing shipment?</p>
+              </div>
+              <div className="bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700 flex w-full sm:w-auto shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setType("in")}
+                  className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${type === "in" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                >
+                  Entry (In)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setType("out")}
+                  className={`flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${type === "out" ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/30" : "text-slate-500 hover:text-slate-900 dark:hover:text-white"}`}
+                >
+                  Exit (Out)
+                </button>
+              </div>
             </div>
           </div>
 
           {type === "in" ? (
-            <>
-              <div>
-                <label htmlFor="fromLocation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From (Source) *</label>
-                <input type="text" name="fromLocation" required list="fromLocations-list" className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" placeholder="e.g. Supplier X" />
+            <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 bg-emerald-50/30 dark:bg-emerald-500/5 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-500/10 animate-in fade-in duration-300">
+              <div className="space-y-2">
+                <label htmlFor="fromLocation" className="block text-sm font-semibold text-emerald-900 dark:text-emerald-400">Source Location (From) *</label>
+                <input type="text" name="fromLocation" required list="fromLocations-list" className="block w-full rounded-2xl border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all px-5 py-3.5 border" placeholder="Where did it come from?" />
               </div>
-              <div>
-                <label htmlFor="timeArrived" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Arrived *</label>
-                <input type="datetime-local" name="timeArrived" required className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" />
+              <div className="space-y-2">
+                <label htmlFor="timeArrived" className="block text-sm font-semibold text-emerald-900 dark:text-emerald-400">Arrival Timestamp *</label>
+                <input type="datetime-local" name="timeArrived" required className="block w-full rounded-2xl border-emerald-100 dark:border-emerald-900/30 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all px-5 py-3.5 border" />
               </div>
-            </>
+            </div>
           ) : (
-            <>
-              <div>
-                <label htmlFor="toLocation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To (Destination) *</label>
-                <input type="text" name="toLocation" required list="toLocations-list" className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" placeholder="e.g. Customer Y" />
+            <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 bg-indigo-50/30 dark:bg-indigo-500/5 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-500/10 animate-in fade-in duration-300">
+              <div className="space-y-2">
+                <label htmlFor="toLocation" className="block text-sm font-semibold text-indigo-900 dark:text-indigo-400">Destination (To) *</label>
+                <input type="text" name="toLocation" required list="toLocations-list" className="block w-full rounded-2xl border-indigo-100 dark:border-indigo-900/30 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all px-5 py-3.5 border" placeholder="Where is it going?" />
               </div>
-              <div>
-                <label htmlFor="timeLeft" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Left *</label>
-                <input type="datetime-local" name="timeLeft" required className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white" />
+              <div className="space-y-2">
+                <label htmlFor="timeLeft" className="block text-sm font-semibold text-indigo-900 dark:text-indigo-400">Departure Timestamp *</label>
+                <input type="datetime-local" name="timeLeft" required className="block w-full rounded-2xl border-indigo-100 dark:border-indigo-900/30 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all px-5 py-3.5 border" />
               </div>
-            </>
+            </div>
           )}
 
-          <div className="col-span-1 md:col-span-2 pt-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Vehicle & Driver Details</h3>
+          <div className="col-span-1 md:col-span-2 pt-6 mb-2">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-sm">
+                <Truck className="w-4 h-4" />
+              </span>
+              Logistics Information
+            </h3>
           </div>
 
-          <div>
-            <label htmlFor="vehicleNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Vehicle Number *
+          <div className="space-y-2">
+            <label htmlFor="vehicleNumber" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Vehicle Registration *
             </label>
             <input
               type="text"
@@ -333,14 +341,14 @@ export default function Home() {
               id="vehicleNumber"
               required
               list="vehicleNumbers-list"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. TN-00-AA-0000"
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border uppercase"
+              placeholder="TN-XX-XXXX"
             />
           </div>
 
-          <div>
-            <label htmlFor="driverName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Driver Name *
+          <div className="space-y-2">
+            <label htmlFor="driverName" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Driver Full Name *
             </label>
             <input
               type="text"
@@ -348,14 +356,14 @@ export default function Home() {
               id="driverName"
               required
               list="driverNames-list"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. John Doe"
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="Who is driving?"
             />
           </div>
 
-          <div>
-            <label htmlFor="driverContact" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Driver Contact *
+          <div className="space-y-2">
+            <label htmlFor="driverContact" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Driver Phone Number *
             </label>
             <input
               type="tel"
@@ -363,92 +371,118 @@ export default function Home() {
               id="driverContact"
               required
               list="driverContacts-list"
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="e.g. +91 9876543210"
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="+91 XXXXX XXXXX"
             />
           </div>
 
-          <div className="col-span-1 md:col-span-2">
-            <label htmlFor="comments" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Comments (Optional)
+          <div className="col-span-1 md:col-span-2 space-y-2">
+            <label htmlFor="comments" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Additional Notes
             </label>
             <textarea
               name="comments"
               id="comments"
-              rows={3}
-              className="block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-4 py-2 border bg-white dark:bg-[#222] dark:text-white"
-              placeholder="Any additional notes..."
+              rows={4}
+              className="block w-full rounded-3xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="Any specific comments about this shipment..."
             />
           </div>
         </div>
 
-        <div className="flex justify-end pt-4">
+        <div className="flex justify-end pt-6">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center py-2 px-8 border border-transparent shadow-sm text-sm font-medium rounded-md text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white dark:focus:ring-offset-[#1a1a1a] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center py-4 px-12 border border-transparent shadow-xl shadow-indigo-500/20 text-base font-bold rounded-2xl text-white bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-900 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 group"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                Saving...
+                <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
+                Processing...
               </>
             ) : (
-              "Save Record"
+              "Save Movement Record"
             )}
           </button>
         </div>
       </form>
 
-      {/* Recent Entries Error UI */}
-      {recentRecordsError && (
-        <div className="mt-12 bg-white dark:bg-[#1a1a1a] p-6 md:p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm transition-colors">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Recent Entries</h2>
+      {/* Recent Entries UI */}
+      <div className="mt-20">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <Clock className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Recent Activity</h2>
           </div>
-          <div className="bg-orange-50 dark:bg-orange-900/20 p-4 border border-orange-200 dark:border-orange-800/50 rounded-md">
-            <p className="text-sm text-orange-800 dark:text-orange-200">
-              <strong>Database Index Required:</strong> Your recent entries cannot be displayed yet because Firestore needs a composite index for this query.
-              <br /><br />
-              Please open your browser's <strong>Developer Tools Console</strong> to find the exact direct link generated by Firebase. Clicking that link will automatically build the required index for you in your Firebase Console.
+          {recentRecords.length > 0 && (
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Last 5 records</span>
+          )}
+        </div>
+
+        {recentRecordsError ? (
+          <div className="bg-amber-50 dark:bg-amber-500/10 p-8 border border-amber-200 dark:border-amber-500/20 rounded-3xl animate-in fade-in duration-500 shadow-sm">
+            <h3 className="font-bold text-amber-900 dark:text-amber-400 mb-2">Firestore Index Required</h3>
+            <p className="text-amber-800/80 dark:text-amber-300/80 leading-relaxed text-sm">
+              We couldn't load your recent entries. Firestore needs a composite index to run this query. 
+              Please check your browser console for the direct link to create the index in Firebase.
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Recent Entries Section */}
-      {!recentRecordsError && recentRecords.length > 0 && (
-        <div className="mt-12 bg-white dark:bg-[#1a1a1a] p-6 md:p-8 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm transition-colors">
-          <div className="flex items-center gap-2 mb-6">
-            <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Your Recent Entries</h2>
-          </div>
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
-            {recentRecords.map((record) => (
-              <div key={record.id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase ${record.type === "in" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"}`}>
-                      {record.type}
+        ) : recentRecords.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {recentRecords.map((record, idx) => (
+              <div 
+                key={record.id} 
+                className="group relative bg-white dark:bg-slate-900/50 backdrop-blur-sm p-5 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className={`mt-1 p-2 rounded-xl border ${record.type === "in" ? "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" : "bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20"}`}>
+                      {record.type === "in" ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className="font-bold text-slate-900 dark:text-white">{record.goodsName}</span>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">x{record.quantity}</span>
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${record.type === "in" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400" : "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400"}`}>
+                          {record.type}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+                          <MapPin className="w-3.5 h-3.5 opacity-50" />
+                          {record.location}
+                        </span>
+                        <span className="hidden sm:inline opacity-30">•</span>
+                        <span className="flex items-center gap-1.5">
+                          <Truck className="w-3.5 h-3.5 opacity-50" />
+                          {record.vehicleNumber}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 border-slate-100 dark:border-slate-800 pt-3 sm:pt-0">
+                    <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+                      {record.createdAt ? format(new Date(record.createdAt), "MMM d") : ''}
                     </span>
-                    <span className="font-semibold text-gray-900 dark:text-gray-100">{record.goodsName}</span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">x{record.quantity}</span>
+                    <span className="text-base font-black text-slate-900 dark:text-white">
+                      {record.createdAt ? format(new Date(record.createdAt), "HH:mm") : ''}
+                    </span>
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <span className="font-medium text-gray-700 dark:text-gray-300">{record.location}</span>
-                    <span>•</span>
-                    <span>{record.vehicleNumber}</span>
-                  </div>
-                </div>
-                <div className="text-sm text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                  {record.createdAt ? format(new Date(record.createdAt), "MMM d, HH:mm") : ''}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-20 bg-slate-100/50 dark:bg-slate-900/30 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <Package className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
+            <p className="text-slate-500 dark:text-slate-400 font-medium">No activity recorded yet.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

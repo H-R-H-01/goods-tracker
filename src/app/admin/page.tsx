@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { GoodsRecord } from "@/lib/types";
-import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer, User, Truck } from "lucide-react";
 import { format } from "date-fns";
 
 export default function AdminDashboard() {
@@ -154,271 +154,303 @@ export default function AdminDashboard() {
     }
 
     return (
-        <div className="max-w-[1400px] mx-auto py-10 px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Admin Dashboard</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Manage and view all goods movement records.</p>
+        <div className="max-w-[1400px] mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between mb-10 gap-6">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Management Console</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-lg">Comprehensive overview of all goods movement across locations.</p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
-                    <button
-                        onClick={exportToCSV}
-                        className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#222] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white transition-colors"
-                    >
-                        <Download className="h-4 w-4 mr-2" />
-                        Export CSV
-                    </button>
-                    <div className="relative w-full sm:w-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="flex flex-col sm:flex-row gap-4 items-center bg-white dark:bg-slate-900/50 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-sm">
+                    <div className="relative w-full sm:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                         <input
                             type="text"
-                            placeholder="Search records..."
+                            placeholder="Search records, drivers, vehicles..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white w-full sm:w-64 bg-white dark:bg-[#1a1a1a] dark:text-white transition-colors"
+                            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-sm"
                         />
                     </div>
                     <select
                         value={filterType}
                         onChange={(e) => setFilterType(e.target.value as any)}
-                        className="border border-gray-300 dark:border-gray-700 rounded-md py-2 px-4 focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white bg-white dark:bg-[#1a1a1a] dark:text-white w-full sm:w-auto transition-colors"
+                        className="w-full sm:w-auto px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-all text-sm font-medium"
                     >
                         <option value="all">All Movements</option>
-                        <option value="in">In (Entry)</option>
-                        <option value="out">Out (Exit)</option>
+                        <option value="in">Entries Only</option>
+                        <option value="out">Exits Only</option>
                     </select>
+                    <button
+                        onClick={exportToCSV}
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95 whitespace-nowrap"
+                    >
+                        <Download className="h-4 w-4 mr-2" />
+                        Export Data
+                    </button>
                 </div>
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex items-center transition-colors">
-                    <div className="p-3 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mr-4">
-                        <Package className="h-6 w-6" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {[
+                    { label: "Total Today", value: todayRecords.length, icon: Package, color: "blue" },
+                    { label: "Entries Today", value: todayIn, icon: ArrowDownRight, color: "emerald" },
+                    { label: "Exits Today", value: todayOut, icon: ArrowUpRight, color: "indigo" },
+                    { label: "Active Hubs", value: uniqueLocations, icon: MapPin, color: "amber" }
+                ].map((stat, i) => (
+                    <div key={i} className="group bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300">
+                        <div className="flex items-center gap-5">
+                            <div className={`p-4 rounded-2xl bg-${stat.color}-50 dark:bg-${stat.color}-500/10 text-${stat.color}-600 dark:text-${stat.color}-400 group-hover:scale-110 transition-transform duration-300`}>
+                                <stat.icon className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                                <p className="text-3xl font-black text-slate-900 dark:text-white mt-0.5">{stat.value}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Today</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayRecords.length}</p>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex items-center transition-colors">
-                    <div className="p-3 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 mr-4">
-                        <ArrowDownRight className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Entries Today</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayIn}</p>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex items-center transition-colors">
-                    <div className="p-3 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 mr-4">
-                        <ArrowUpRight className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Exits Today</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{todayOut}</p>
-                    </div>
-                </div>
-                <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm flex items-center transition-colors">
-                    <div className="p-3 rounded-full bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mr-4">
-                        <MapPin className="h-6 w-6" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Locations Today</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{uniqueLocations}</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
-            <div className="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm transition-colors">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[#1a1a1a]">
-                    <thead className="bg-gray-50 dark:bg-[#222]">
-                        <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date & Time</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Goods</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">From/To</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vehicle</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Driver</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Created By</th>
-                            <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800 bg-white dark:bg-[#1a1a1a]">
-                        {filteredRecords.length === 0 ? (
-                            <tr>
-                                <td colSpan={9} className="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                    No records found matching your filters.
-                                </td>
+            <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
+                <div className="overflow-x-auto">
+                    <table className="w-full border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Timestamp</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Type</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Location</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Goods & Qty</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Route Info</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Logistics</th>
+                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Operator</th>
+                                <th className="px-6 py-5 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Actions</th>
                             </tr>
-                        ) : (
-                            filteredRecords.map((record) => (
-                                <tr key={record.id} className="hover:bg-gray-50/50 dark:hover:bg-[#222]/50 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {format(new Date(record.createdAt), "MMM d, yyyy HH:mm")}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${record.type === "in" ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
-                                            }`}>
-                                            {record.type.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">{record.location}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {record.quantity}x {record.goodsName}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {record.type === "in" ? (
-                                            <>From: <span className="font-medium text-gray-700 dark:text-gray-300">{record.fromLocation}</span></>
-                                        ) : (
-                                            <>To: <span className="font-medium text-gray-700 dark:text-gray-300">{record.toLocation}</span></>
-                                        )}
-                                        <br />
-                                        <span className="text-xs text-gray-400 dark:text-gray-500">
-                                            {record.type === "in"
-                                                ? `Arr: ${record.timeArrived ? format(new Date(record.timeArrived), "HH:mm") : "-"}`
-                                                : `Left: ${record.timeLeft ? format(new Date(record.timeLeft), "HH:mm") : "-"}`
-                                            }
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{record.vehicleNumber}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                        {record.driverName}
-                                        <div className="text-xs text-gray-400 dark:text-gray-500">{record.driverContact}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{record.userName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => setPrintingRecord(record)}
-                                            className="text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white mr-4 transition-colors"
-                                            title="Print Receipt"
-                                        >
-                                            <Printer className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => setEditingRecord(record)}
-                                            className="text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300 mr-4"
-                                            title="Edit"
-                                        >
-                                            <Edit2 className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(record.id)}
-                                            className="text-red-600 dark:text-red-500 hover:text-red-900 dark:hover:text-red-400 transition-colors"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {filteredRecords.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="px-6 py-20 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full">
+                                                <Search className="h-8 w-8 text-slate-400" />
+                                            </div>
+                                            <p className="text-slate-500 dark:text-slate-400 font-medium">No records match your current search criteria.</p>
+                                        </div>
                                     </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                filteredRecords.map((record) => (
+                                    <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-900 dark:text-white uppercase">
+                                                    {format(new Date(record.createdAt), "MMM d")}
+                                                </span>
+                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                    {format(new Date(record.createdAt), "HH:mm:ss")}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${record.type === "in" 
+                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
+                                                : "bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20"
+                                            }`}>
+                                                {record.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                                                <span className="text-sm font-bold text-slate-900 dark:text-white">{record.location}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                                                    <Package className="h-5 w-5 text-slate-500" />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-900 dark:text-white">{record.goodsName}</span>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Qty: {record.quantity}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-1.5 text-xs">
+                                                    <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
+                                                        {record.type === "in" ? "From:" : "To:"}
+                                                    </span>
+                                                    <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                                                        {record.type === "in" ? record.fromLocation : record.toLocation}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[10px]">
+                                                    <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
+                                                        {record.type === "in" ? "Arr:" : "Left:"}
+                                                    </span>
+                                                    <span className="text-slate-500 font-medium">
+                                                        {record.type === "in"
+                                                            ? (record.timeArrived ? format(new Date(record.timeArrived), "HH:mm") : "-")
+                                                            : (record.timeLeft ? format(new Date(record.timeLeft), "HH:mm") : "-")
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex flex-col">
+                                                <span className="text-sm font-bold text-slate-900 dark:text-white">{record.vehicleNumber}</span>
+                                                <span className="text-xs text-slate-500 dark:text-slate-400">{record.driverName}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                                                    <User className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                                                </div>
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{record.userName?.split(' ')[0]}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => setPrintingRecord(record)}
+                                                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
+                                                    title="Print Receipt"
+                                                >
+                                                    <Printer className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingRecord(record)}
+                                                    className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all"
+                                                    title="Edit Record"
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(record.id)}
+                                                    className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
+                                                    title="Delete Record"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Edit Modal */}
             {editingRecord && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Edit Record</h3>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800 scale-in-center animate-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between p-8 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Edit Record</h3>
+                                <p className="text-xs text-slate-500 mt-1 uppercase tracking-widest font-bold">ID: {editingRecord.id.slice(0, 8)}</p>
+                            </div>
                             <button
                                 onClick={() => setEditingRecord(null)}
-                                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                                className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all"
                             >
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleUpdate} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Location</label>
+                        <form onSubmit={handleUpdate} className="p-8 space-y-6">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Operational Location</label>
                                 <input
                                     type="text"
                                     name="location"
                                     defaultValue={editingRecord.location}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                    className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Goods Name</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Goods Name</label>
                                     <input
                                         type="text"
                                         name="goodsName"
                                         defaultValue={editingRecord.goodsName}
-                                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                        className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Quantity</label>
                                     <input
                                         type="number"
                                         name="quantity"
                                         defaultValue={editingRecord.quantity}
-                                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                        className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                     />
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Vehicle Number</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Vehicle Number</label>
                                 <input
                                     type="text"
                                     name="vehicleNumber"
                                     defaultValue={editingRecord.vehicleNumber}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                    className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none uppercase"
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Driver Name</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Driver Name</label>
                                     <input
                                         type="text"
                                         name="driverName"
                                         defaultValue={editingRecord.driverName}
-                                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                        className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Driver Contact</label>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Contact No.</label>
                                     <input
                                         type="text"
                                         name="driverContact"
                                         defaultValue={editingRecord.driverContact}
-                                        className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                        className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                     />
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Comments</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Comments</label>
                                 <textarea
                                     name="comments"
                                     rows={3}
                                     defaultValue={editingRecord.comments}
-                                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-black dark:text-white shadow-sm focus:border-black dark:focus:border-white focus:ring-black dark:focus:ring-white sm:text-sm px-3 py-2 border"
+                                    className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                 />
                             </div>
 
-                            <div className="flex justify-end pt-4 gap-3">
+                            <div className="flex items-center gap-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setEditingRecord(null)}
-                                    className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-[#222] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+                                    className="flex-1 px-6 py-4 rounded-2xl text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 tracking-wide"
                                 >
-                                    Cancel
+                                    Discard Changes
                                 </button>
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white dark:text-black bg-black dark:bg-white hover:bg-gray-800 dark:hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black dark:focus:ring-white"
+                                    className="flex-1 px-6 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-xl shadow-indigo-500/20 transition-all active:scale-95 tracking-wide flex items-center justify-center gap-2"
                                 >
-                                    <Save className="h-4 w-4 mr-2" />
-                                    Save Changes
+                                    <Save className="h-4 w-4" />
+                                    Update Record
                                 </button>
                             </div>
                         </form>
@@ -426,88 +458,75 @@ export default function AdminDashboard() {
                 </div>
             )}
 
-            {/* Print Modal */}
+            {/* Print Receipt Logic (Simplified but modernized) */}
             {printingRecord && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:bg-white print:p-0 print:backdrop-blur-none" onClick={() => setPrintingRecord(null)}>
-                    <div className="bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl max-w-sm w-full p-8 print:shadow-none print:max-w-none print:w-full print:p-8 relative print:bg-white" onClick={(e) => e.stopPropagation()}>
-                        <div className="absolute top-4 right-4 print:hidden flex gap-2">
-                            <button
-                                onClick={() => window.print()}
-                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                title="Print"
-                            >
-                                <Printer className="h-4 w-4" />
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 print:bg-white print:p-0 print:backdrop-blur-none" onClick={() => setPrintingRecord(null)}>
+                    <div className="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl max-w-sm w-full p-10 print:shadow-none print:max-w-none print:w-full print:p-10 relative overflow-hidden border border-slate-200 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
+                        {/* Decorative background for receipt */}
+                        <div className="absolute top-0 left-0 w-full h-2 bg-indigo-600" />
+                        
+                        <div className="flex justify-end mb-8 print:hidden">
+                            <button onClick={() => window.print()} className="p-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-2xl hover:bg-indigo-100 transition-all mr-2">
+                                <Printer className="h-5 w-5" />
                             </button>
-                            <button
-                                onClick={() => setPrintingRecord(null)}
-                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
-                                title="Close"
-                            >
-                                <X className="h-4 w-4" />
+                            <button onClick={() => setPrintingRecord(null)} className="p-3 bg-slate-50 dark:bg-slate-800 text-slate-500 rounded-2xl hover:bg-slate-100 transition-all">
+                                <X className="h-5 w-5" />
                             </button>
                         </div>
 
-                        <div className="text-center mb-6">
-                            <h2 className="text-2xl font-bold uppercase tracking-widest text-black dark:text-white print:text-black">Goods Tracker</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 print:text-gray-500 mt-1">Movement Receipt</p>
+                        <div className="text-center mb-10">
+                            <Truck className="h-10 w-10 text-indigo-600 mx-auto mb-4" />
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Goods Tracker</h2>
+                            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mt-1">Official Receipt</p>
                         </div>
 
-                        <div className="border-t border-b border-gray-200 dark:border-gray-700 print:border-gray-200 py-4 mb-4 space-y-3">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm">Date & Time:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{format(new Date(printingRecord.createdAt), "dd MMM yyyy, HH:mm")}</span>
+                        <div className="space-y-4 border-y border-slate-100 dark:border-slate-800 py-6 mb-8">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Receipt Date</span>
+                                <span className="font-black text-slate-900 dark:text-white">{format(new Date(printingRecord.createdAt), "dd MMM yyyy")}</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm">Type:</span>
-                                <span className={`font-bold text-sm uppercase ${printingRecord.type === 'in' ? 'text-green-600 dark:text-green-400 print:text-green-600' : 'text-blue-600 dark:text-blue-400 print:text-blue-600'}`}>{printingRecord.type}</span>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Movement Type</span>
+                                <span className={`font-black uppercase italic ${printingRecord.type === 'in' ? 'text-emerald-600' : 'text-indigo-600'}`}>{printingRecord.type}bound</span>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm">Location:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{printingRecord.location}</span>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Station</span>
+                                <span className="font-black text-slate-900 dark:text-white">{printingRecord.location}</span>
                             </div>
                         </div>
 
-                        <div className="space-y-3 mb-6">
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm">Goods Name:</span>
-                                <span className="font-bold text-sm text-right dark:text-gray-200 print:text-black">{printingRecord.goodsName}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm">Quantity:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{printingRecord.quantity}</span>
-                            </div>
-                            {printingRecord.type === "in" && printingRecord.fromLocation && (
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm mr-4">From:</span>
-                                    <span className="font-medium text-sm text-right break-words dark:text-gray-200 print:text-black">{printingRecord.fromLocation}</span>
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl mb-10 border border-slate-100 dark:border-slate-700/50">
+                            <div className="flex flex-col gap-4">
+                                <div>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Goods Package</p>
+                                    <p className="text-lg font-black text-slate-900 dark:text-white leading-none">{printingRecord.goodsName}</p>
+                                    <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">Quantity: {printingRecord.quantity}</p>
                                 </div>
-                            )}
-                            {printingRecord.type === "out" && printingRecord.toLocation && (
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 dark:text-gray-400 print:text-gray-500 text-sm mr-4">To:</span>
-                                    <span className="font-medium text-sm text-right break-words dark:text-gray-200 print:text-black">{printingRecord.toLocation}</span>
+                                <div className="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Vehicle</p>
+                                        <p className="text-sm font-black text-slate-900 dark:text-white">{printingRecord.vehicleNumber}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Driver</p>
+                                        <p className="text-sm font-black text-slate-900 dark:text-white">{printingRecord.driverName}</p>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-
-                        <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg mb-6 border border-gray-100 dark:border-gray-800 print:bg-white print:border-gray-200 transition-colors">
-                            <p className="text-xs text-gray-500 dark:text-gray-400 print:text-gray-500 mb-2 uppercase tracking-wider font-semibold">Vehicle Details</p>
-                            <div className="flex justify-between mt-2">
-                                <span className="text-gray-600 dark:text-gray-400 print:text-gray-600 text-sm">Number:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{printingRecord.vehicleNumber}</span>
-                            </div>
-                            <div className="flex justify-between mt-1">
-                                <span className="text-gray-600 dark:text-gray-400 print:text-gray-600 text-sm">Driver:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{printingRecord.driverName}</span>
-                            </div>
-                            <div className="flex justify-between mt-1">
-                                <span className="text-gray-600 dark:text-gray-400 print:text-gray-600 text-sm">Contact:</span>
-                                <span className="font-medium text-sm dark:text-gray-200 print:text-black">{printingRecord.driverContact}</span>
                             </div>
                         </div>
 
-                        <div className="text-center mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 print:border-gray-200">
-                            <p className="text-xs text-gray-400 dark:text-gray-500 print:text-gray-400">Generated by {printingRecord.userName}</p>
+                        <div className="text-center pt-6 border-t border-dashed border-slate-200 dark:border-slate-800">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                Generated by {printingRecord.userName} <br />
+                                Thank you for your business
+                            </p>
+                        </div>
+                        
+                        {/* Cut lines for style */}
+                        <div className="absolute bottom-0 left-0 w-full h-4 overflow-hidden flex gap-1 opacity-20 translate-y-2">
+                             {[...Array(20)].map((_, i) => (
+                                 <div key={i} className="w-4 h-4 rounded-full bg-slate-900 dark:bg-white flex-shrink-0" />
+                             ))}
                         </div>
                     </div>
                 </div>

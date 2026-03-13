@@ -90,60 +90,87 @@ export default function LocationsDashboard() {
     }
 
     return (
-        <div className="max-w-[1400px] mx-auto py-10 px-4 sm:px-6 lg:px-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Locations Overview</h1>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Analytics and activity breakdown by operational venue.</p>
+        <div className="max-w-[1400px] mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
+                <div className="space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Locations Intelligence</h1>
+                    <p className="text-slate-500 dark:text-slate-400 text-lg">Performance metrics and logistics health across all hubs.</p>
+                </div>
+                
+                <div className="flex items-center gap-3 bg-white dark:bg-slate-900/50 p-4 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-sm">
+                   <div className="flex flex-col items-center px-4 border-r border-slate-100 dark:border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Hubs</span>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{locationsArray.length}</span>
+                   </div>
+                   <div className="flex flex-col items-center px-4">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Activity</span>
+                      <span className="text-xl font-black text-slate-900 dark:text-white">{records.length}</span>
+                   </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {locationsArray.length === 0 ? (
-                    <div className="col-span-full text-center py-12 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-gray-800 transition-colors">
-                        <MapPin className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">No Locations Found</h3>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Start adding records to see location analytics.</p>
+                    <div className="col-span-full py-24 bg-white dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center px-6">
+                        <div className="w-20 h-20 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6">
+                            <MapPin className="h-10 w-10 text-slate-300 dark:text-slate-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Location Data Found</h3>
+                        <p className="text-slate-500 dark:text-slate-400 max-w-sm">Capture movement records from the home screen to populate your location analytics board.</p>
                     </div>
                 ) : (
-                    locationsArray.map(loc => (
-                        <div key={loc.name} className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
-                            <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate max-w-[200px]" title={loc.name}>{loc.name}</h3>
-                                    <div className="flex items-center text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                        <Navigation className="h-3 w-3 mr-1" />
-                                        <span>Active {loc.lastActive ? new Date(loc.lastActive).toLocaleDateString() : 'Never'}</span>
+                    locationsArray.map((loc, idx) => (
+                        <div 
+                            key={loc.name} 
+                            className="group relative bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-[2rem] p-7 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-none transition-all duration-500 animate-in fade-in slide-in-from-bottom-4"
+                            style={{ animationDelay: `${idx * 50}ms` }}
+                        >
+                            <div className="flex items-start justify-between mb-8">
+                                <div className="space-y-1.5 flex-1 min-w-0">
+                                    <h3 className="text-xl font-black text-slate-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" title={loc.name}>
+                                        {loc.name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+                                        <Navigation className="h-3 w-3" />
+                                        <span>Active {loc.lastActive ? new Date(loc.lastActive).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Never'}</span>
                                     </div>
                                 </div>
-                                <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                                    <MapPin className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                                <div className="p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-all duration-300">
+                                    <MapPin className="h-5 w-5" />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
-                                    <div className="flex items-center text-green-700 dark:text-green-400 mb-1">
-                                        <ArrowDownRight className="h-4 w-4 mr-1" />
-                                        <span className="text-xs font-medium uppercase">Entries</span>
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-emerald-50/50 dark:bg-emerald-500/5 rounded-2xl p-4 border border-emerald-100/50 dark:border-emerald-500/10 group-hover:scale-[1.02] transition-transform duration-300">
+                                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-2">
+                                        <div className="p-1 rounded-md bg-emerald-100 dark:bg-emerald-500/20">
+                                            <ArrowDownRight className="h-3 w-3" />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest italic">Entries</span>
                                     </div>
-                                    <p className="text-xl font-bold text-green-800 dark:text-green-300">{loc.entries}</p>
+                                    <p className="text-2xl font-black text-slate-900 dark:text-white">{loc.entries}</p>
                                 </div>
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                                    <div className="flex items-center text-blue-700 dark:text-blue-400 mb-1">
-                                        <ArrowUpRight className="h-4 w-4 mr-1" />
-                                        <span className="text-xs font-medium uppercase">Exits</span>
+                                <div className="bg-indigo-50/50 dark:bg-indigo-500/5 rounded-2xl p-4 border border-indigo-100/50 dark:border-indigo-500/10 group-hover:scale-[1.02] transition-transform duration-300">
+                                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2">
+                                        <div className="p-1 rounded-md bg-indigo-100 dark:bg-indigo-500/20">
+                                            <ArrowUpRight className="h-3 w-3" />
+                                        </div>
+                                        <span className="text-[10px] font-black uppercase tracking-widest italic">Exits</span>
                                     </div>
-                                    <p className="text-xl font-bold text-blue-800 dark:text-blue-300">{loc.exits}</p>
+                                    <p className="text-2xl font-black text-slate-900 dark:text-white">{loc.exits}</p>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 flex items-center justify-between transition-colors">
-                                <div className="flex items-center text-gray-600 dark:text-gray-400">
-                                    <Package className="h-4 w-4 mr-2" />
-                                    <span className="text-sm font-medium">Unique Goods Types</span>
+                            <div className="flex items-center justify-between p-4 bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-700/50 group-hover:border-indigo-200 dark:group-hover:border-indigo-500/20 transition-colors">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-white dark:bg-slate-900 rounded-lg shadow-sm">
+                                        <Package className="h-4 w-4 text-slate-400 group-hover:text-indigo-500 transition-colors" />
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Goods Varieties</span>
                                 </div>
-                                <span className="text-sm font-bold text-gray-900 dark:text-white bg-white dark:bg-[#222] px-2 py-1 rounded shadow-sm">
+                                <div className="px-3 py-1 bg-white dark:bg-slate-900 rounded-xl text-sm font-black text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 shadow-sm group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-600 transition-all duration-300">
                                     {loc.uniqueGoods.size}
-                                </span>
+                                </div>
                             </div>
                         </div>
                     ))
