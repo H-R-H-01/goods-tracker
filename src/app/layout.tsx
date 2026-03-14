@@ -32,6 +32,14 @@ export default function RootLayout({
             <main className="flex-1 relative z-10 w-full">
               {children}
             </main>
+            <footer className="relative z-10 border-t border-slate-200 dark:border-slate-800 py-12 bg-white dark:bg-slate-950">
+              <div className="max-w-7xl mx-auto px-4 text-center">
+                <p className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center justify-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                  © {new Date().getFullYear()} GoodsTracker Logistics System
+                </p>
+              </div>
+            </footer>
           </div>
         </Providers>
       </body>

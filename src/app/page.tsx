@@ -156,16 +156,29 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <h1 className="text-4xl font-bold tracking-tight mb-4 dark:text-white">Welcome to GoodsTracker</h1>
-        <p className="text-gray-500 dark:text-gray-400 max-w-lg mb-8 text-lg">
-          Track vehicle goods simply and efficiently.
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-center px-4 animate-in fade-in zoom-in duration-700">
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full" />
+          <div className="relative p-6 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-2xl">
+            <Truck className="h-16 w-16 text-indigo-600 dark:text-indigo-400" />
+          </div>
+        </div>
+        <h1 className="text-4xl sm:text-6xl font-black tracking-tighter mb-4 text-slate-900 dark:text-white">
+          Manage Goods <br />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">With Precision.</span>
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 max-w-lg mb-10 text-lg sm:text-xl font-medium leading-relaxed">
+          The ultimate logistics tracking companion for modern warehouses and transport hubs.
         </p>
         <button
           onClick={signIn}
-          className="bg-black text-white dark:bg-white dark:text-black px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors shadow-lg"
+          className="group relative inline-flex items-center justify-center px-10 py-4 font-bold text-white transition-all duration-200 bg-indigo-600 font-pj rounded-2xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 shadow-xl shadow-indigo-500/20 hover:scale-105 active:scale-95"
         >
-          Sign In to Continue
+          <div className="absolute inset-0 w-full h-full rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 opacity-100 group-hover:opacity-90 active:opacity-100 transition-opacity" />
+          <span className="relative flex items-center gap-2">
+            Get Started Now
+            <ArrowUpRight className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </span>
         </button>
       </div>
     );
