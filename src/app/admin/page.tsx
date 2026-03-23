@@ -8,6 +8,7 @@ import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } fro
 import { GoodsRecord } from "@/lib/types";
 import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer, User, Truck } from "lucide-react";
 import { format } from "date-fns";
+import * as XLSX from "xlsx";
 
 export default function AdminDashboard() {
     const { user, loading } = useAuth();
@@ -84,49 +85,69 @@ export default function AdminDashboard() {
         }
     };
 
-    const exportToCSV = () => {
+    const exportToExcel = () => {
         if (filteredRecords.length === 0) {
             alert("No records to export.");
             return;
         }
 
-        const headers = [
-            "Date", "Type", "Location", "Goods Name", "Quantity",
-            "From (Source)", "To (Destination)", "Time Arrived", "Time Left",
-            "Vehicle Number", "Driver Name", "Driver Contact", "Created By", "Comments"
-        ];
+        const mapRecord = (record: GoodsRecord) => ({
+            "Date": format(new Date(record.createdAt), "yyyy-MM-dd"),
+            "Time": format(new Date(record.createdAt), "HH:mm:ss"),
+            "Type": record.type.toUpperCase(),
+            "Location": record.location || '',
+            "Goods Name": record.goodsName || '',
+            "Quantity": record.quantity,
+            "From (Source)": record.fromLocation || '',
+            "To (Destination)": record.toLocation || '',
+            "Time Arrived": record.timeArrived ? format(new Date(record.timeArrived), "yyyy-MM-dd HH:mm:ss") : '',
+            "Time Left": record.timeLeft ? format(new Date(record.timeLeft), "yyyy-MM-dd HH:mm:ss") : '',
+            "Vehicle Number": record.vehicleNumber || '',
+            "Driver Name": record.driverName || '',
+            "Driver Contact": record.driverContact || '',
+            "Created By": record.userName || '',
+            "Comments": record.comments || ''
+        });
 
-        const csvData = filteredRecords.map(record => [
-            format(new Date(record.createdAt), "yyyy-MM-dd HH:mm:ss"),
-            record.type.toUpperCase(),
-            `"${record.location || ''}"`,
-            `"${record.goodsName || ''}"`,
-            record.quantity,
-            `"${record.fromLocation || ''}"`,
-            `"${record.toLocation || ''}"`,
-            record.timeArrived ? format(new Date(record.timeArrived), "yyyy-MM-dd HH:mm:ss") : '',
-            record.timeLeft ? format(new Date(record.timeLeft), "yyyy-MM-dd HH:mm:ss") : '',
-            `"${record.vehicleNumber || ''}"`,
-            `"${record.driverName || ''}"`,
-            `"${record.driverContact || ''}"`,
-            `"${record.userName || ''}"`,
-            `"${record.comments || ''}"`
-        ]);
+        // Sheet 1: All Records
+        const allData = filteredRecords.map(mapRecord);
+        const wsAll = XLSX.utils.json_to_sheet(allData);
 
-        const csvContent = [
-            headers.join(','),
-            ...csvData.map(row => row.join(','))
-        ].join('\n');
+        // Sheet 2: Entries (Inbound)
+        const inData = filteredRecords.filter(r => r.type === "in").map(mapRecord);
+        const wsIn = XLSX.utils.json_to_sheet(inData);
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `goods_tracker_export_${format(new Date(), "yyyy-MM-dd_HHmmss")}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Sheet 3: Exits (Outbound)
+        const outData = filteredRecords.filter(r => r.type === "out").map(mapRecord);
+        const wsOut = XLSX.utils.json_to_sheet(outData);
+
+        // Sheet 4: Summary (Analytics)
+        const locations = Array.from(new Set(filteredRecords.map(r => r.location)));
+        const summaryData = locations.map(loc => {
+            const locRecords = filteredRecords.filter(r => r.location === loc);
+            const inCount = locRecords.filter(r => r.type === "in").length;
+            const outCount = locRecords.filter(r => r.type === "out").length;
+            const totalQty = locRecords.reduce((sum, r) => sum + (Number(r.quantity) || 0), 0);
+            return {
+                "Location": loc || "Unknown",
+                "Total Records": locRecords.length,
+                "Inbound Records": inCount,
+                "Outbound Records": outCount,
+                "Total Quantity Handled": totalQty
+            };
+        });
+
+        const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+
+        // Create workbook and add sheets
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, wsSummary, "Analytics Summary");
+        XLSX.utils.book_append_sheet(wb, wsAll, "All Records");
+        XLSX.utils.book_append_sheet(wb, wsIn, "Entries");
+        XLSX.utils.book_append_sheet(wb, wsOut, "Exits");
+
+        // Export Excel file
+        XLSX.writeFile(wb, `goods_tracker_export_${format(new Date(), "yyyyMMdd_HHmmss")}.xlsx`);
     };
 
     const today = new Date();
@@ -182,7 +203,7 @@ export default function AdminDashboard() {
                         <option value="out">Exits Only</option>
                     </select>
                     <button
-                        onClick={exportToCSV}
+                        onClick={exportToExcel}
                         className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95 whitespace-nowrap"
                     >
                         <Download className="h-4 w-4 mr-2" />
