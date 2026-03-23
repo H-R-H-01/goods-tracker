@@ -6,9 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { GoodsRecord } from "@/lib/types";
-import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer, User, Truck } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, X, Save, Download, ArrowDownRight, ArrowUpRight, MapPin, Package, Printer, User, Truck, BarChart2, List } from "lucide-react";
 import { format } from "date-fns";
 import * as XLSX from "xlsx";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, CartesianGrid } from "recharts";
 
 export default function AdminDashboard() {
     const { user, loading } = useAuth();
@@ -16,6 +17,7 @@ export default function AdminDashboard() {
     const [loadingRecords, setLoadingRecords] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterType, setFilterType] = useState<"all" | "in" | "out">("all");
+    const [activeTab, setActiveTab] = useState<"records" | "analytics">("records");
 
     // Edit State
     const [editingRecord, setEditingRecord] = useState<GoodsRecord | null>(null);
@@ -157,6 +159,23 @@ export default function AdminDashboard() {
     const todayOut = todayRecords.filter(r => r.type === "out").length;
     const uniqueLocations = new Set(todayRecords.map(r => r.location)).size;
 
+    // Analytics Calculation
+    const pieData = [
+        { name: "Inbound", value: filteredRecords.filter(r => r.type === "in").length },
+        { name: "Outbound", value: filteredRecords.filter(r => r.type === "out").length }
+    ];
+    const PIE_COLORS = ['#10b981', '#6366f1'];
+
+    const locationCounts = filteredRecords.reduce((acc, r) => {
+        const loc = r.location || "Unknown";
+        acc[loc] = (acc[loc] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+    const locationData = Object.keys(locationCounts).map(key => ({
+        location: key,
+        count: locationCounts[key]
+    })).sort((a, b) => b.count - a.count).slice(0, 5);
+
     if (loading || loadingRecords) {
         return (
             <div className="flex justify-center items-center h-[50vh]">
@@ -234,140 +253,227 @@ export default function AdminDashboard() {
                 ))}
             </div>
 
-            <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Timestamp</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Type</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Location</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Goods & Qty</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Route Info</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Logistics</th>
-                                <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Operator</th>
-                                <th className="px-6 py-5 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {filteredRecords.length === 0 ? (
-                                <tr>
-                                    <td colSpan={8} className="px-6 py-20 text-center">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full">
-                                                <Search className="h-8 w-8 text-slate-400" />
-                                            </div>
-                                            <p className="text-slate-500 dark:text-slate-400 font-medium">No records match your current search criteria.</p>
-                                        </div>
-                                    </td>
+            {/* Tabs */}
+            <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl w-fit mb-8 shadow-inner">
+                <button
+                    onClick={() => setActiveTab("records")}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        activeTab === "records"
+                            ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    }`}
+                >
+                    <List className="h-4 w-4" />
+                    Records View
+                </button>
+                <button
+                    onClick={() => setActiveTab("analytics")}
+                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                        activeTab === "analytics"
+                            ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                    }`}
+                >
+                    <BarChart2 className="h-4 w-4" />
+                    Analytics Visuals
+                </button>
+            </div>
+
+            {activeTab === "records" ? (
+                <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Timestamp</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Type</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Location</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Goods & Qty</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Route Info</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Logistics</th>
+                                    <th className="px-6 py-5 text-left text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Operator</th>
+                                    <th className="px-6 py-5 text-right text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Actions</th>
                                 </tr>
-                            ) : (
-                                filteredRecords.map((record) => (
-                                    <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-900 dark:text-white uppercase">
-                                                    {format(new Date(record.createdAt), "MMM d")}
-                                                </span>
-                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                                                    {format(new Date(record.createdAt), "HH:mm:ss")}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${record.type === "in" 
-                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
-                                                : "bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20"
-                                            }`}>
-                                                {record.type}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                                <span className="text-sm font-bold text-slate-900 dark:text-white">{record.location}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                                    <Package className="h-5 w-5 text-slate-500" />
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {filteredRecords.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="px-6 py-20 text-center">
+                                            <div className="flex flex-col items-center gap-3">
+                                                <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-full">
+                                                    <Search className="h-8 w-8 text-slate-400" />
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-sm font-bold text-slate-900 dark:text-white">{record.goodsName}</span>
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Qty: {record.quantity}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-1.5 text-xs">
-                                                    <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
-                                                        {record.type === "in" ? "From:" : "To:"}
-                                                    </span>
-                                                    <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
-                                                        {record.type === "in" ? record.fromLocation : record.toLocation}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-[10px]">
-                                                    <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
-                                                        {record.type === "in" ? "Arr:" : "Left:"}
-                                                    </span>
-                                                    <span className="text-slate-500 font-medium">
-                                                        {record.type === "in"
-                                                            ? (record.timeArrived ? format(new Date(record.timeArrived), "HH:mm") : "-")
-                                                            : (record.timeLeft ? format(new Date(record.timeLeft), "HH:mm") : "-")
-                                                        }
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-900 dark:text-white">{record.vehicleNumber}</span>
-                                                <span className="text-xs text-slate-500 dark:text-slate-400">{record.driverName}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
-                                                    <User className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-                                                </div>
-                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{record.userName?.split(' ')[0]}</span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => setPrintingRecord(record)}
-                                                    className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
-                                                    title="Print Receipt"
-                                                >
-                                                    <Printer className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => setEditingRecord(record)}
-                                                    className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all"
-                                                    title="Edit Record"
-                                                >
-                                                    <Edit2 className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(record.id)}
-                                                    className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
-                                                    title="Delete Record"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                <p className="text-slate-500 dark:text-slate-400 font-medium">No records match your current search criteria.</p>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ) : (
+                                    filteredRecords.map((record) => (
+                                        <tr key={record.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-900 dark:text-white uppercase">
+                                                        {format(new Date(record.createdAt), "MMM d")}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                                                        {format(new Date(record.createdAt), "HH:mm:ss")}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${record.type === "in" 
+                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" 
+                                                    : "bg-indigo-50 text-indigo-700 border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20"
+                                                }`}>
+                                                    {record.type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                                                    <span className="text-sm font-bold text-slate-900 dark:text-white">{record.location}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                                                        <Package className="h-5 w-5 text-slate-500" />
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-bold text-slate-900 dark:text-white">{record.goodsName}</span>
+                                                        <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">Qty: {record.quantity}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-1.5 text-xs">
+                                                        <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
+                                                            {record.type === "in" ? "From:" : "To:"}
+                                                        </span>
+                                                        <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[120px]">
+                                                            {record.type === "in" ? record.fromLocation : record.toLocation}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5 text-[10px]">
+                                                        <span className="text-slate-400 font-bold uppercase tracking-tighter w-10">
+                                                            {record.type === "in" ? "Arr:" : "Left:"}
+                                                        </span>
+                                                        <span className="text-slate-500 font-medium">
+                                                            {record.type === "in"
+                                                                ? (record.timeArrived ? format(new Date(record.timeArrived), "HH:mm") : "-")
+                                                                : (record.timeLeft ? format(new Date(record.timeLeft), "HH:mm") : "-")
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-slate-900 dark:text-white">{record.vehicleNumber}</span>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">{record.driverName}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center">
+                                                        <User className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                                                    </div>
+                                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{record.userName?.split(' ')[0]}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => setPrintingRecord(record)}
+                                                        className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all"
+                                                        title="Print Receipt"
+                                                    >
+                                                        <Printer className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEditingRecord(record)}
+                                                        className="p-2 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all"
+                                                        title="Edit Record"
+                                                    >
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(record.id)}
+                                                        className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all"
+                                                        title="Delete Record"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 animate-in fade-in slide-in-from-bottom-4">
+                    {/* Pie Chart */}
+                    <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Movement Distribution</h3>
+                        <div className="h-[300px] w-full">
+                            {filteredRecords.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            innerRadius={80}
+                                            outerRadius={120}
+                                            paddingAngle={5}
+                                            dataKey="value"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                                            itemStyle={{ color: '#1e293b', fontWeight: 'bold' }}
+                                        />
+                                        <Legend verticalAlign="bottom" height={36}/>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-slate-400">No data available</div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Bar Chart */}
+                    <div className="bg-white dark:bg-slate-900/50 backdrop-blur-sm border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Top Hubs by Activity</h3>
+                        <div className="h-[300px] w-full">
+                            {locationData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={locationData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                                        <XAxis dataKey="location" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                                        <Tooltip 
+                                            cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', color: '#1e293b' }}
+                                            itemStyle={{ fontWeight: 'bold' }}
+                                        />
+                                        <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} barSize={40} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-slate-400">No data available</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Modal */}
             {editingRecord && (
