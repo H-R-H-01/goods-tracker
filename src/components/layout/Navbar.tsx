@@ -16,6 +16,7 @@ export function Navbar() {
         { name: "Add Record", href: "/" },
         { name: "Dashboard", href: "/admin" },
         { name: "Locations", href: "/locations" },
+        { name: "Tasks", href: "/tasks" },
     ];
 
     return (

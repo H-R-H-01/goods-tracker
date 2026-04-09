@@ -18,4 +18,21 @@ export type GoodsRecord = {
     inCharge: string;
     createdAt: string; // stored as ISO string
     comments?: string;
+    inChargeComment?: string;
+};
+
+export type TaskPriority = 1 | 2 | 3 | 4 | 5;
+
+export type TaskStatus = "pending" | "in-progress" | "completed";
+
+export type Task = {
+    id: string;
+    title: string;
+    description: string;
+    raisedBy: string;
+    userEmail: string;
+    assignedTo?: string; // team or others
+    priority: TaskPriority;
+    status: TaskStatus;
+    createdAt: string;
 };

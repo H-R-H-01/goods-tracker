@@ -110,6 +110,7 @@ export default function Home() {
       userName: user.displayName || user.email,
       userEmail: user.email,
       inCharge: formData.get("inCharge"),
+      inChargeComment: formData.get("inChargeComment"),
       createdAt: new Date().toISOString(),
     };
 
@@ -403,6 +404,19 @@ export default function Home() {
               className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
               placeholder="Who is recording this?"
             />
+          </div>
+
+          <div className="col-span-1 md:col-span-2 space-y-2">
+             <label htmlFor="inChargeComment" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+               In-Charge Comments (Optional)
+             </label>
+             <textarea
+               name="inChargeComment"
+               id="inChargeComment"
+               rows={2}
+               className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+               placeholder="Any specific notes from the person in-charge..."
+             />
           </div>
 
           <div className="col-span-1 md:col-span-2 space-y-2">

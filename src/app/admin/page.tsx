@@ -68,6 +68,7 @@ export default function AdminDashboard() {
                 driverName: formData.get("driverName"),
                 driverContact: formData.get("driverContact"),
                 inCharge: formData.get("inCharge"),
+                inChargeComment: formData.get("inChargeComment"),
                 comments: formData.get("comments"),
             };
 
@@ -110,6 +111,7 @@ export default function AdminDashboard() {
             "Driver Name": record.driverName || '',
             "Driver Contact": record.driverContact || '',
             "In-Charge": record.inCharge || '',
+            "In-Charge Comment": record.inChargeComment || '',
             "Created By": record.userName || '',
             "Comments": record.comments || ''
         });
@@ -384,6 +386,11 @@ export default function AdminDashboard() {
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{record.inCharge}</span>
+                                                        {record.inChargeComment && (
+                                                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold truncate max-w-[120px]" title={record.inChargeComment}>
+                                                                Note: {record.inChargeComment}
+                                                            </span>
+                                                        )}
                                                         <span className="text-[10px] text-slate-500 font-medium">System: {record.userName?.split(' ')[0]}</span>
                                                     </div>
                                                 </div>
@@ -566,6 +573,16 @@ export default function AdminDashboard() {
                                     type="text"
                                     name="inCharge"
                                     defaultValue={editingRecord.inCharge}
+                                    className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">In-Charge Comment</label>
+                                <textarea
+                                    name="inChargeComment"
+                                    rows={2}
+                                    defaultValue={editingRecord.inChargeComment}
                                     className="w-full px-4 py-3 rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all border outline-none"
                                 />
                             </div>
