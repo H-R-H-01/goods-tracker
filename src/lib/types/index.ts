@@ -15,6 +15,7 @@ export type GoodsRecord = {
     driverContact: string;
     userName: string;
     userEmail: string;
+    inCharge: string;
     createdAt: string; // stored as ISO string
     comments?: string;
 };

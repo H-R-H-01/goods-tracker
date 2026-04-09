@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase/config";
 import { addDoc, collection, getDocs, query, orderBy, limit, where, onSnapshot } from "firebase/firestore";
-import { Loader2, Clock, Truck, MapPin, ArrowDownRight, ArrowUpRight, Package } from "lucide-react";
+import { Loader2, Clock, Truck, MapPin, ArrowDownRight, ArrowUpRight, Package, User } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Home() {
@@ -109,6 +109,7 @@ export default function Home() {
       comments: formData.get("comments"),
       userName: user.displayName || user.email,
       userEmail: user.email,
+      inCharge: formData.get("inCharge"),
       createdAt: new Date().toISOString(),
     };
 
@@ -389,6 +390,21 @@ export default function Home() {
             />
           </div>
 
+          <div className="space-y-2">
+            <label htmlFor="inCharge" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              User / In-Charge Name *
+            </label>
+            <input
+              type="text"
+              name="inCharge"
+              id="inCharge"
+              required
+              defaultValue={user.displayName || ""}
+              className="block w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all px-5 py-3.5 border"
+              placeholder="Who is recording this?"
+            />
+          </div>
+
           <div className="col-span-1 md:col-span-2 space-y-2">
             <label htmlFor="comments" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
               Additional Notes
@@ -473,6 +489,11 @@ export default function Home() {
                         <span className="flex items-center gap-1.5">
                           <Truck className="w-3.5 h-3.5 opacity-50" />
                           {record.vehicleNumber}
+                        </span>
+                        <span className="hidden sm:inline opacity-30">•</span>
+                        <span className="flex items-center gap-1.5 capitalize">
+                          <User className="w-3.5 h-3.5 opacity-50" />
+                          {record.inCharge}
                         </span>
                       </div>
                     </div>
